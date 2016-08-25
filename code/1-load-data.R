@@ -1,3 +1,7 @@
+
+source("code/0-package.R")
+
+
 ## Load data
 
 # Structured community discussions forms:
@@ -23,9 +27,9 @@ formid <- 636
 kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
 write.csv(data_636, "data/data_636.csv")
 
-formid <- 665
-kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
-write.csv(data_665, "data/data_665.csv")
+#formid <- 665
+#kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
+#write.csv(data_665, "data/data_665.csv")
 
 
 
@@ -41,6 +45,9 @@ write.csv(data_774, "data/data_774.csv")
 data <- rbind (data_774, data_747)
 
 
+write.csv(data, "data/data.csv")
+
+data  <- read.csv("data/data.csv", row.names=1)
 
 ########################################################################
 ################# Trying ot get the form nicely with labels 
@@ -54,67 +61,79 @@ data <- rbind (data_774, data_747)
 ## Load survey structure in XLS form
 
 form_tmp <- "data/Structured_community_discussion_numbered_v1.xls"
-
 survey <- read_excel(form_tmp, sheet = "survey")                         
 
 
 ## Avoid columns without names
-survey <- survey[ ,c("type",   "name" ,  "label::English", "label::Arabic" ,"hint::Arabic",               
-                     "hint::English", "relevant",  "required", "constraint",   "constraint_message::Arabic", 
-                     "constraint_message::English", "default",  "appearance", "calculation",  "read_only"  ,                
-                     "repeat_count")]
+survey <- survey[ ,c("type",   "name" ,  "label::English"#,
+                     #"label::Arabic" ,"hint::Arabic",               
+                    # "hint::English", "relevant",  "required", "constraint",   "constraint_message::Arabic", 
+                    # "constraint_message::English", "default",  "appearance", "calculation",  "read_only"  ,                
+                   # "repeat_count"
+                   )]
 
 ## need to delete empty rows from the form
-survey <- survey[!is.na(survey$type), ] 
+survey <- as.data.frame(survey[!is.na(survey$type), ])
+str(survey)
+
 
 survey_temp <- survey %>%
   filter(!type %in% c("begin group", "end group", "note")) %>%
   separate(type, into = c("q_type", "q_group"), sep = " ", fill = "right")
 
-names(survey_temp)
-
-
-survey_temp1 <- survey_temp[ ,c("q_type", "q_group" ,  "name" ,   "label::English")]
-names(survey_temp1)[4] <- "label"
-survey_temp1 <- as.data.frame(survey_temp1)
+#names(survey_temp)
+names(survey_temp)[4] <- "label"
+survey_temp1 <- as.data.frame(survey_temp)
 
 ## get variable name from data
+rm(datalabel)
 datalabel <- as.data.frame( names(data))
 names(datalabel)[1] <- "nameor"
 datalabel$nameor <- as.character(datalabel$nameor)
 
 ## new variables name without /
 datalabel$namenew <- str_replace_all(datalabel$nameor, "/", ".")
-
-
 ## let's recode the variable of the dataset using short label - column 3 of my reviewed labels
-names(data) <- datalabel[, 2]
-
+#names(data) <- datalabel[, 2]
 
 ## Extract the variable name as defined in the form
-datalabel$length <- str_length(datalabel$nameor)
-datalabel$find <- regexpr("/",datalabel$nameor)
-datalabel$nameor2 <- substr(datalabel$nameor,datalabel$find+1, 200)
-datalabel$find2 <- regexpr("/",datalabel$nameor2)
+datalabel$length <- str_length(datalabel$namenew)
+#str(datalabel)
+## Find the next dot to parse the label 
+datalabel$find <- regexpr(".", datalabel$namenew, fixed = TRUE, useBytes = TRUE)
+#summary(datalabel$find)
+datalabel$nameor2 <- substr(datalabel$namenew,datalabel$find+1, 200)
+datalabel$find2 <- regexpr(".",datalabel$nameor2, fixed = TRUE, useBytes = TRUE)
 datalabel$name <- substr(datalabel$nameor2,datalabel$find2 +1, 200)
-datalabel <- join(x=datalabel, y=survey_temp1, by="name", type = "left")
+datalabel <- join(x=datalabel, y=survey_temp, by="name", type = "left")
 
 
 #datalabel$q_group <- as.factor(datalabel$q_group)
 #datalabel$namenew <- as.character(datalabel$namenew)
 
+names(datalabel)
 ## Exact variable that match likert type on agreement
-datalabel.agreement <- datalabel[ datalabel$q_group=="Agreement", ]
-datalabel.agreement <- na.omit(datalabel.agreement[1:10])
-datalabel.agreement <- datalabel.agreement$namenew
+#datalabel.agreement <- datalabel[ datalabel$q_group=="Agreement", ]
+
+levels(as.factor(datalabel$q_type))
+
+datalabel.agreement <- datalabel[ datalabel$q_type %in% c("integer", "select_one"), ]
+
+#datalabel.agreement <- na.omit(datalabel.agreement[1:10])
+#datalabel.agreement <- datalabel.agreement$namenew
 
 ## Conversion table to get the correct label
-datalabel.agreement.label <-datalabel[ datalabel$namenew %in% c("introduction.partner", "introduction.commcenter",
-                                                             "introduction.fgtype1", "introduction.fgtype", datalabel.agreement), ]
+#datalabel.agreement.label <-datalabel[ datalabel$namenew %in% c("introduction.numbers" ,"introduction.partner", "introduction.commcenter",
+#                                                             "introduction.fgtype1", "introduction.fgtype", datalabel.agreement), ]
 
+selectedvar <- datalabel.agreement$namenew
 
 #names(data)
-data.agreement <-subset(data, select=c("introduction.partner", "introduction.commcenter", "introduction.fgtype1", "introduction.fgtype", datalabel.agreement) )
+#data.agreement <-subset(data, select=c("introduction.numbers" , "introduction.partner", "introduction.commcenter", "introduction.fgtype1", "introduction.fgtype", datalabel.agreement) )
+data.agreement <-subset(data, select=c(selectedvar) )
+
+write.csv(data.agreement, "data/dataagreement.csv")
+write.csv(datalabel.agreement, "data/datalabelagreementlabel.csv")
 
 ## Inputting the label
 

@@ -2,10 +2,10 @@
 ############################################
 ## Library used to get data from kobo
 
-source("http://news.mrdwab.com/install_github.R")
+#source("http://news.mrdwab.com/install_github.R")
 
-library(devtools)
-install_github("mrdwab/koboloadeR")
+#library(devtools)
+#install_github("mrdwab/koboloadeR")
 
 
 
@@ -35,7 +35,10 @@ library("koboloadeR")
 source("code/usernamepassword.R")
 
 library("sqldf")
-library(stringr)
+library("stringr")
+library("tidyr")
+library("dplyr")
+library("data.table")
 
 ############################################
 ## Library used for analysis
@@ -50,6 +53,9 @@ library(ggthemes)
 #install_github('jbryer/likert')
 library(likert)
 library(reshape)
+
+library(readxl)
+library(plyr)
 
 #display.brewer.all()
 # Choose a qualitative color palette with blue and red
