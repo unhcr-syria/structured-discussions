@@ -49,115 +49,20 @@ write.csv(data, "data/data.csv")
 
 data  <- read.csv("data/data.csv", row.names=1)
 
-########################################################################
-################# Trying ot get the form nicely with labels 
-## https://gist.github.com/mrdwab/28c13a0537044aeb5dc0
-########################################################################
-
-#source("code/1-kobo_form_downloader.R")
-#kobo_form_downloader (formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/")
+## Results cleaned manually
+data2  <- read.csv("data/data2.csv")
 
 
-## Load survey structure in XLS form
-
-form_tmp <- "data/Structured_community_discussion_numbered_v1.xls"
-survey <- read_excel(form_tmp, sheet = "survey")                         
-
-
-## Avoid columns without names
-survey <- survey[ ,c("type",   "name" ,  "label::English"#,
-                     #"label::Arabic" ,"hint::Arabic",               
-                    # "hint::English", "relevant",  "required", "constraint",   "constraint_message::Arabic", 
-                    # "constraint_message::English", "default",  "appearance", "calculation",  "read_only"  ,                
-                   # "repeat_count"
-                   )]
-
-## need to delete empty rows from the form
-survey <- as.data.frame(survey[!is.na(survey$type), ])
-str(survey)
-
-
-survey_temp <- survey %>%
-  filter(!type %in% c("begin group", "end group", "note")) %>%
-  separate(type, into = c("q_type", "q_group"), sep = " ", fill = "right")
-
-#names(survey_temp)
-names(survey_temp)[4] <- "label"
-survey_temp1 <- as.data.frame(survey_temp)
-
-## get variable name from data
-rm(datalabel)
-datalabel <- as.data.frame( names(data))
-names(datalabel)[1] <- "nameor"
-datalabel$nameor <- as.character(datalabel$nameor)
-
-## new variables name without /
-datalabel$namenew <- str_replace_all(datalabel$nameor, "/", ".")
-## let's recode the variable of the dataset using short label - column 3 of my reviewed labels
-#names(data) <- datalabel[, 2]
-
-## Extract the variable name as defined in the form
-datalabel$length <- str_length(datalabel$namenew)
-#str(datalabel)
-## Find the next dot to parse the label 
-datalabel$find <- regexpr(".", datalabel$namenew, fixed = TRUE, useBytes = TRUE)
-#summary(datalabel$find)
-datalabel$nameor2 <- substr(datalabel$namenew,datalabel$find+1, 200)
-datalabel$find2 <- regexpr(".",datalabel$nameor2, fixed = TRUE, useBytes = TRUE)
-datalabel$name <- substr(datalabel$nameor2,datalabel$find2 +1, 200)
-datalabel <- join(x=datalabel, y=survey_temp, by="name", type = "left")
-
-
-#datalabel$q_group <- as.factor(datalabel$q_group)
-#datalabel$namenew <- as.character(datalabel$namenew)
-
-names(datalabel)
-## Exact variable that match likert type on agreement
-#datalabel.agreement <- datalabel[ datalabel$q_group=="Agreement", ]
-
-levels(as.factor(datalabel$q_type))
-
-datalabel.agreement <- datalabel[ datalabel$q_type %in% c("integer", "select_one"), ]
-
-#datalabel.agreement <- na.omit(datalabel.agreement[1:10])
-#datalabel.agreement <- datalabel.agreement$namenew
+source("code/1-get-labels-from-form.R")
 
 ## Conversion table to get the correct label
-#datalabel.agreement.label <-datalabel[ datalabel$namenew %in% c("introduction.numbers" ,"introduction.partner", "introduction.commcenter",
-#                                                             "introduction.fgtype1", "introduction.fgtype", datalabel.agreement), ]
 
 selectedvar <- datalabel.agreement$namenew
 
 #names(data)
 #data.agreement <-subset(data, select=c("introduction.numbers" , "introduction.partner", "introduction.commcenter", "introduction.fgtype1", "introduction.fgtype", datalabel.agreement) )
-data.agreement <-subset(data, select=c(selectedvar) )
+data.agreement2 <-subset(data2, select=c(selectedvar) )
 
-write.csv(data.agreement, "data/dataagreement.csv")
+write.csv(data.agreement2, "data/dataagreement.csv")
 write.csv(datalabel.agreement, "data/datalabelagreementlabel.csv")
-
-## Inputting the label
-
-
-##################################
-## for the record -- different test to do the samae than above
-
-#datalabel1 <- datalabel %>% str_split("/")
-#datalabel1 <- sqldf("select * from datalabel, survey_temp1  where name LIKE nameor")
-
-## pmatch(), and agrep(), grep(), grepl() are three functions
-#datalabel1 <- pmatch(datalabel[14, ], survey_temp1$name, nomatch = NA_integer_, duplicates.ok = TRUE)
-#datalabel2 <- agrep(datalabel[14, ], survey_temp1$name, ignore.case=T, value=T, max.distance = 20, useBytes = FALSE)
-#datalabel3 <- grep(datalabel[14, ], survey_temp1$name, ignore.case=T, value=T, useBytes = FALSE)
-#datalabel31 <- grep(datalabel[14, ], survey_temp1$name, value=TRUE)
-#datalabel32 <- grep(survey_temp1$name, datalabel[14, ], value=TRUE)
-#datalabel3 <- grep("($|[^a-zA-Z])|([^a-z]+|^)datalabel[14, ]",  survey_temp1$name, ignore.case = TRUE, value = TRUE)
-#datalabel4 <- grepl(datalabel[14, ], survey_temp1$name)
-
-
-## testing with string function
-
-#str(survey_temp1)
-#str(datalabel)
-#datalabel5  <-  str_match(datalabel[14, 1], survey_temp1$name)
-#datalabel51 <-  str_match(survey_temp1[14, 3], datalabel$nameor)
 

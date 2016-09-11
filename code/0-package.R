@@ -32,7 +32,7 @@
 # Format is "username:password" 
 
 library("koboloadeR")
-source("code/usernamepassword.R")
+#source("code/usernamepassword.R")
 
 library("sqldf")
 library("stringr")
@@ -44,6 +44,10 @@ library("data.table")
 ## Library used for analysis
 
 library(ggplot2)
+
+library(ggmap)
+library(gridExtra)
+
 library(RColorBrewer)
 library(directlabels)
 library(ggthemes)
