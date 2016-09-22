@@ -12,7 +12,7 @@ source("code/0-package.R")
 
 
 
-kobo_datasetsunhcr <- kobo_datasets (user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/")
+#kobo_datasetsunhcr <- kobo_datasets (user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/")
 #kobo_datasetsocha <- kobo_datasets (user = usernamepasswordocha , api = "https://kc.humanitarianresponse.info/api/v1/")
 #kobo_datasetsocha2 <- kobo_datasets (user = usernamepasswordocha2 , api = "https://kc.humanitarianresponse.info/api/v1/")
 
@@ -23,9 +23,9 @@ kobo_datasetsunhcr <- kobo_datasets (user = usernamepasswordunhcr , api = "https
 
 
 ## Downloading using
-formid <- 636
-kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
-write.csv(data_636, "data/data_636.csv")
+#formid <- 636
+#kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
+#write.csv(data_636, "data/data_636.csv")
 
 #formid <- 665
 #kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
@@ -33,21 +33,21 @@ write.csv(data_636, "data/data_636.csv")
 
 
 
-formid <- 747
-kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
-write.csv(data_747, "data/data_747.csv")
+#formid <- 747
+#kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
+#write.csv(data_747, "data/data_747.csv")
 
-formid <- 774
-kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
-write.csv(data_774, "data/data_774.csv")
-
-
-data <- rbind (data_774, data_747)
+#formid <- 774
+#kobo_data_downloader(formid, user = usernamepasswordunhcr , api = "https://kobocat.unhcr.org/api/v1/", check = TRUE)
+#write.csv(data_774, "data/data_774.csv")
 
 
-write.csv(data, "data/data.csv")
+#data <- rbind (data_774, data_747)
 
-data  <- read.csv("data/data.csv", row.names=1)
+
+#write.csv(data, "data/data.csv")
+
+#data  <- read.csv("data/data.csv", row.names=1)
 
 ## Results cleaned manually
 data2  <- read.csv("data/data2.csv")

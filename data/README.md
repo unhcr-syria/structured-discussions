@@ -1,1 +1,1 @@
-# structured-discussions
+# Folder to put your data!
