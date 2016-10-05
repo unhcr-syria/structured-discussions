@@ -70,3 +70,4 @@ datalabel.agreement <- datalabel[ datalabel$q_type %in% c("integer", "select_one
 
 #datalabel.agreement <- na.omit(datalabel.agreement[1:10])
 #datalabel.agreement <- datalabel.agreement$namenew
+
